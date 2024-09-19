@@ -2,6 +2,7 @@
   "files": {
     "monsters.xml": "1f37c531d56e236b6907c615b531a48cf245b89a64cc829246f7137ca85d39db",
     "index.js": "4025efe8fb04e3977b865297a36bf60ba9964dceeb55741c5712650941ebeec4",
-    "module.json": "4365840854ebc1e8716b00a522f42cb4b8ac8647286c0050bcb4ed49fa1ab3ce"
+    "module.json": "4365840854ebc1e8716b00a522f42cb4b8ac8647286c0050bcb4ed49fa1ab3ce",
+    "README.md": "6de393ff12378d65e1ce3069eb7fbcfa693f3e2a5d3e1966011d08c1c380a6da"
   }
 }

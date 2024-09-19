@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
-const filesToHash = ["monsters.xml", "index.js", "module.json"];
+const filesToHash = ["monsters.xml", "index.js", "module.json", "README.md"];
 
 function generateFileHash(filePath) {
   const fileBuffer = fs.readFileSync(filePath);
