@@ -1,6 +1,6 @@
 {
     "name": "obs-record",
-    "author": "yoshinoa",
+    "author": "Somen/_yoshino",
     "description": "Toolbox mod that starts recording when you enter combat and stops when you leave combat.",
     "version": "1.0",
     "options": {

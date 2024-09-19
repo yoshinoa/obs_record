@@ -72,14 +72,12 @@ module.exports = function StartRecording(mod) {
           };
         });
       });
-      mod.log("Monsters and dungeon data loaded successfully.");
     });
   });
 
   obs
     .connect(address, password, { rpcVersion: 1 })
     .then(() => {
-      mod.log("Connected to OBS WebSocket successfully.");
       Msg("Connected to OBS WebSocket successfully.", mod);
     })
     .catch((err) => {
@@ -107,7 +105,6 @@ module.exports = function StartRecording(mod) {
         .then(() => obs.call("StartRecord"))
         .then(() => {
           isRecording = true;
-          mod.log(`Recording started for ${bossName}`);
 
           Msg(`Recording started for ${bossName}!`, mod);
         })
@@ -121,7 +118,6 @@ module.exports = function StartRecording(mod) {
         .call("StopRecord")
         .then(() => {
           isRecording = false;
-          mod.log("Recording stopped");
 
           Msg("Recording stopped.", mod);
         })
@@ -153,19 +149,18 @@ module.exports = function StartRecording(mod) {
 
   mod.hook("S_LOAD_TOPO", 3, () => {
     if (isRecording) {
-      mod.log("Instance change detected. Resetting...");
+      bossDead = false;
+      inCombat = false;
+      stopRecording();
     }
-    bossDead = false;
-    inCombat = false;
-    stopRecording();
   });
 
   mod.hook("S_INSTANCE_ARROW", 4, () => {
     if (isRecording) {
       mod.log("Boss reset detected. Resetting...");
+      bossDead = false;
+      inCombat = false;
+      stopRecording();
     }
-    bossDead = false;
-    inCombat = false;
-    stopRecording();
   });
 };
