@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-manifest": "node ./generate_manifest.js"
+    "generate-manifest": "node ./generate_manifest.js",
+    "build": "node ./build.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "esbuild": "^0.23.1",
     "obs-websocket-js": "^5.0.6",
     "ws": "^8.18.0",
     "xml2js": "^0.6.2"
