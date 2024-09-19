@@ -1,0 +1,17 @@
+{
+  "name": "obs_record",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "obs-websocket-js": "^5.0.6",
+    "ws": "^8.18.0",
+    "xml2js": "^0.6.2"
+  }
+}
