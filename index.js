@@ -4,6 +4,13 @@ const fs = require("fs");
 const xml2js = require("xml2js"); // XML parser
 const obs = new OBSWebSocket();
 
+const defaultConfig = {
+  obs: {
+    address: "ws://127.0.0.1:44555",
+    password: "your-password-here",
+  },
+};
+
 // Define your custom message function
 function Msg(msg, mod) {
   const LPrC = "#00FF00"; // Custom color (adjust as needed)
@@ -19,9 +26,19 @@ module.exports = function StartRecording(mod) {
   let dungeonMap = {};
   let currentDungeon = "UnknownDungeon";
 
-  const config = JSON.parse(
-    fs.readFileSync(__dirname + "/config.json", "utf-8")
-  );
+  if (!fs.existsSync(configPath)) {
+    mod.log("Config file not found. Generating default config...");
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify(defaultConfig, null, 2),
+      "utf-8"
+    );
+    mod.log(
+      "Default config file created. Please update the config with your OBS settings."
+    );
+    return;
+  }
+  const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
   const { address, password } = config.obs;
 
   // Load and parse the monsters.xml file
