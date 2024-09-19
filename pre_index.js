@@ -42,7 +42,6 @@ module.exports = function StartRecording(mod) {
     mod.log(
       "Default config file created. Please update the config with your OBS settings."
     );
-    return;
   }
 
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
