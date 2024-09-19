@@ -7,5 +7,7 @@
         "cliName": "OBS Recorder",
         "guiName": "OBS Recorder",
         "reloadable": true
-    }
+    },
+    "servers": ["https://raw.githubusercontent.com/yoshinoa/obs_record/main/"],
+    "disableAutoUpdate": false
 }
