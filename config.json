@@ -1,6 +1,6 @@
 {
     "obs": {
       "address": "ws://127.0.0.1:4455",
-      "password": "kb4CpWc54rHb9djs"
+      "password": "YourWebsocketPassword"
     }
   }
