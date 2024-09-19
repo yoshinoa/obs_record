@@ -9,6 +9,10 @@ const defaultConfig = {
     address: "ws://127.0.0.1:4455",
     password: "your-password-here",
   },
+  recording: {
+    temporary: true,
+    saveAll: false,
+  },
 };
 
 function Msg(msg, mod) {
@@ -20,6 +24,33 @@ function sendErrorToChat(message, err = null) {
   const fullMessage = err ? `${message} Error: ${err.message || err}` : message;
   mod.command.message(fullMessage);
   mod.error(fullMessage);
+}
+
+function showHelp() {
+  Msg(
+    `
+    <font color="#00FFFF">Video Recording Commands:</font><br>
+    <font color="#FFD700">/8 video save</font> - Save the last temporary recording.<br>
+    <font color="#FFD700">/8 video saveall</font> - Toggle automatic saving of all recordings.<br>
+    <font color="#FFD700">/8 video help</font> - Display this help message.<br><br>
+    
+    <font color="#00FFFF">How it works:</font><br>
+    <font color="#FFD700">Temporary Recordings:</font> By default, recordings are stored temporarily in the "Tera/Temp" folder.<br>
+    After a run, type <font color="#FFD700">/8 video save</font> to save the recording, or it will be deleted.<br><br>
+
+    <font color="#FFD700">Save All Mode:</font> You can toggle this mode with <font color="#FFD700">/8 video saveall</font>.<br>
+    If enabled, all recordings will automatically be saved to the appropriate dungeon folder and won't be treated as temporary.<br><br>
+    
+    <font color="#00FFFF">Current Settings:</font><br>
+    <font color="#FFD700">Temporary Recording:</font> ${
+      config.recording.temporary ? "Enabled" : "Disabled"
+    }<br>
+    <font color="#FFD700">Save All:</font> ${
+      config.recording.saveAll ? "Enabled" : "Disabled"
+    }<br>
+  `,
+    mod
+  );
 }
 
 module.exports = function StartRecording(mod) {
@@ -93,7 +124,9 @@ module.exports = function StartRecording(mod) {
     if (!isRecording) {
       const username = mod.game.me.name;
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const folderPath = `Tera/${currentDungeon}`;
+      const folderPath = config.recording.temporary
+        ? "Tera/Temp"
+        : `Tera/${currentDungeon}`;
       const fileName = `${bossName}_${username}_${timestamp}`;
 
       obs
@@ -105,11 +138,52 @@ module.exports = function StartRecording(mod) {
         .then(() => obs.call("StartRecord"))
         .then(() => {
           isRecording = true;
-
           Msg(`Recording started for ${bossName}!`, mod);
         })
         .catch((err) => mod.error("Failed to start recording:", err));
     }
+  }
+
+  mod.command.add("video", (arg) => {
+    if (arg === "save") {
+      saveLastRun();
+    } else if (arg === "saveall") {
+      config.recording.saveAll = !config.recording.saveAll;
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
+      Msg(
+        `Save all recordings is now ${
+          config.recording.saveAll ? "enabled" : "disabled"
+        }`,
+        mod
+      );
+    } else if (arg === "help") {
+      showHelp();
+    } else {
+      Msg("Unknown command. Type 'video help' for a list of commands.", mod);
+    }
+  });
+
+  function saveLastRun() {
+    const tempPath = `Tera/Temp/${bossName}_${mod.game.me.name}_*`;
+    const finalPath = `Tera/${currentDungeon}`;
+
+    if (!fs.existsSync(finalPath)) {
+      fs.mkdirSync(finalPath, { recursive: true });
+    }
+
+    fs.rename(
+      tempPath,
+      `${finalPath}/${bossName}_${mod.game.me.name}_${new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")}`,
+      (err) => {
+        if (err) {
+          sendErrorToChat("Failed to save the recording", err);
+        } else {
+          Msg(`Recording saved for ${bossName}!`, mod);
+        }
+      }
+    );
   }
 
   function stopRecording() {
@@ -119,7 +193,14 @@ module.exports = function StartRecording(mod) {
         .then(() => {
           isRecording = false;
 
-          Msg("Recording stopped.", mod);
+          if (config.recording.temporary && !config.recording.saveAll) {
+            Msg(
+              "Last run recorded. Type 'video save' to save the last run.",
+              mod
+            );
+          } else {
+            Msg("Recording stopped and saved.", mod);
+          }
         })
         .catch((err) => mod.error("Failed to stop recording:", err));
     }
