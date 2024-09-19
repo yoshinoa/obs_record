@@ -1,9 +1,7 @@
 {
   "files": {
     "index.js": "383416088325ecec6a62d056d08c724167d8d895e6a0db6b10eb58f33924b775",
-    "module.json": "760f6450ad7ee0456209ff113012f31c860fc7758372a594d6c094d7ba15d256",
     "monsters.xml": "1f37c531d56e236b6907c615b531a48cf245b89a64cc829246f7137ca85d39db",
-    "node_modules/.package-lock.json": "4bad93c8cc3b2d359cb7500c38e055a00efb3c7313e2dd06c98e935508f3c5d2",
     "node_modules/@msgpack/msgpack/dist/CachedKeyDecoder.d.ts": "c10bc11463f1636f0130dfcc06c7e41908f250defdf1ee17c517654f014a8b32",
     "node_modules/@msgpack/msgpack/dist/CachedKeyDecoder.js": "bdef0051b649c0ada2e3b1ef381fbb902ce8670528bfb83fd5e292f1f3e4bbd4",
     "node_modules/@msgpack/msgpack/dist/CachedKeyDecoder.js.map": "7b2a97dfc1b4bb3430b46052cea4c9db25b1941d4b3fd2952a83da452ab25315",
@@ -120,7 +118,6 @@
     "node_modules/crypto-js/CONTRIBUTING.md": "57fc0290dc2c6af36a518e7bf04522c34b06d286ac0459e4be3e21ba09c943f6",
     "node_modules/crypto-js/core.js": "2638bdd7224472f801890636d42df16c144ca46c84229ef3087190d21f935daf",
     "node_modules/crypto-js/crypto-js.js": "ee02257ffbaf0a9b481c7039b0f3bb20c360c9674fe4be8b38ae709b2ea59bbe",
-    "node_modules/crypto-js/docs/QuickStartGuide.wiki": "c84212c451d1dae3400f8840c46272467a8630fac26b7a145d21ec0d17eb9619",
     "node_modules/crypto-js/enc-base64.js": "84b69d1625474179d55622a8333c3aac376dd8bc77de7b06c21695762cb69cab",
     "node_modules/crypto-js/enc-base64url.js": "8747798ddd53f467bebd7101bcd053b3f12ef028b3e6c012aede147732c8a9c6",
     "node_modules/crypto-js/enc-hex.js": "c7dad9931250921c24508ba9949abb818745b38891da44693359249b11ed143d",
@@ -350,7 +347,6 @@
     "node_modules/xml2js/lib/xml2js.js": "084d4a06521b7040e97a7eb33a65094e562d8a5766c80dc2baafd3b936a9ed04",
     "node_modules/xml2js/LICENSE": "c51452ef1dfd5606c9fe266930fa6bf7e8a534d52973b6475df5bf212cad5b0a",
     "node_modules/xml2js/README.md": "2ceeb784c12656761720db2a780d04bbd7f5b41ed16cafb965b4a0be64b67c79",
-    "node_modules/xmlbuilder/appveyor.yml": "c165cb0d45b374ab0e5695f5954c9e71d4befdb813186221f910ef009b67a22d",
     "node_modules/xmlbuilder/CHANGELOG.md": "f5d267a62a272d1684f597a29ada8cf46c4d916a43cf091bfc05da69ecc89f8f",
     "node_modules/xmlbuilder/lib/Derivation.js": "c8d49354f512f64fb6a10a75ef298c09c0316be8424b357dc5f00c3413b62a0f",
     "node_modules/xmlbuilder/lib/DocumentPosition.js": "33e04d52b7bae8633b79f22e30b7fed7ca35d6b53ee8e325eb09a161ec0b3fe4",
@@ -391,7 +387,6 @@
     "node_modules/xmlbuilder/lib/XMLTypeInfo.js": "5d1f21358ed0636d947da653bf6bb6c8762a524fe22590513b394f9ebb5d2225",
     "node_modules/xmlbuilder/lib/XMLUserDataHandler.js": "960efb94bc7b6858a2bccfbb692d21ba583591c2b159b990f62e0876272840ef",
     "node_modules/xmlbuilder/lib/XMLWriterBase.js": "85bfc5e040c5c6433bf5756c7c0937c2e368571b6c30fcc2773e60fef1a0f631",
-    "node_modules/xmlbuilder/LICENSE": "e368bc4263b466cf98c225af15e300549e00da8859416a4536109e9654d434a8",
     "node_modules/xmlbuilder/README.md": "0ac3e2ad69e17e315c8689657190f6c4416cc250af99c55071bf0394c6017c66",
     "node_modules/xmlbuilder/typings/index.d.ts": "ff4ec1a818fdc981cf63e314447224587848ca4738e9fb5818b3c204df7b5743",
     "README.md": "6de393ff12378d65e1ce3069eb7fbcfa693f3e2a5d3e1966011d08c1c380a6da"
