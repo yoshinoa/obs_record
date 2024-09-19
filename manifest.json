@@ -1,7 +1,6 @@
 {
   "files": {
     "config.json": "391e4a806c0daa3dac0f4470b39e56f1621d81952e1194d65f3267de69f5f27c",
-    "generate_manifest.js": "9ce0a5734b881bef028acca2b1b97324c97c77c37feb6c7c09d9fbfec3e2ce9c",
     "index.js": "a14721a43e0279ffb51700171695717f38a519377b90dc16d7624aa143171be3",
     "module.json": "4365840854ebc1e8716b00a522f42cb4b8ac8647286c0050bcb4ed49fa1ab3ce",
     "monsters.xml": "1f37c531d56e236b6907c615b531a48cf245b89a64cc829246f7137ca85d39db",
