@@ -124,12 +124,14 @@ module.exports = function StartRecording(mod) {
 
   function startRecording() {
     if (!isRecording) {
-      const username = mod.game.me.name;
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const folderPath = config.recording.temporary
         ? "Tera/Temp"
         : `Tera/${currentDungeon}`;
-      const fileName = `${bossName}_${username}_${timestamp}`;
+      const fileName = config.recording.temporary
+        ? "temp_recording"
+        : `${bossName}_${mod.game.me.name}_${new Date()
+            .toISOString()
+            .replace(/[:.]/g, "-")}`;
 
       obs
         .call("SetProfileParameter", {
@@ -166,26 +168,47 @@ module.exports = function StartRecording(mod) {
   });
 
   function saveLastRun() {
-    const tempPath = `Tera/Temp/${bossName}_${mod.game.me.name}_*`;
-    const finalPath = `Tera/${currentDungeon}`;
+    const tempDir = path.join(__dirname, "Tera", "Temp");
+    const finalDir = path.join(__dirname, "Tera", currentDungeon);
+    const baseFileName = "temp_recording";
 
-    if (!fs.existsSync(finalPath)) {
-      fs.mkdirSync(finalPath, { recursive: true });
+    if (!fs.existsSync(finalDir)) {
+      fs.mkdirSync(finalDir, { recursive: true });
     }
 
-    fs.rename(
-      tempPath,
-      `${finalPath}/${bossName}_${mod.game.me.name}_${new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-")}`,
-      (err) => {
+    fs.readdir(tempDir, (err, files) => {
+      if (err) {
+        sendErrorToChat("Failed to read temp directory", err);
+        return;
+      }
+
+      const tempFile = files.find((file) => file.startsWith(baseFileName));
+
+      if (!tempFile) {
+        sendErrorToChat("No temporary recording found to save.");
+        return;
+      }
+
+      const tempFilePath = path.join(tempDir, tempFile);
+      const extension = path.extname(tempFile);
+      const finalFilePath = path.join(
+        finalDir,
+        `${bossName}_${mod.game.me.name}_${new Date()
+          .toISOString()
+          .replace(/[:.]/g, "-")}${extension}`
+      );
+
+      fs.rename(tempFilePath, finalFilePath, (err) => {
         if (err) {
           sendErrorToChat("Failed to save the recording", err);
         } else {
-          Msg(`Recording saved for ${bossName}!`, mod);
+          Msg(
+            `Recording saved for ${bossName} with extension ${extension}!`,
+            mod
+          );
         }
-      }
-    );
+      });
+    });
   }
 
   function stopRecording() {
