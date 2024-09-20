@@ -308,6 +308,13 @@ module.exports = function StartRecording(mod) {
     }
   });
 
+  mod.hook("S_NPC_TARGET_USER", 1, (event) => {
+    if ((event.target = currentBossId)) {
+      inCombat = true;
+      startRecording();
+    }
+  });
+
   mod.hook("S_LOAD_TOPO", 3, () => {
     if (isRecording) {
       bossDead = false;
