@@ -2,14 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
-const excludedFiles = [
-  "package.json",
-  "package-lock.json",
-  "manifest.json",
-  "generate_manifest.js",
-  ".gitignore",
-];
-const excludedDirs = [".git"];
+const fileWhitelist = ["monsters.xml", "index.js", "module.json", "README.md"];
+const dirWhitelist = ["node_modules"];
 
 function getAllFiles(dirPath, arrayOfFiles) {
   const files = fs.readdirSync(dirPath);
@@ -20,10 +14,10 @@ function getAllFiles(dirPath, arrayOfFiles) {
     const fullPath = path.join(dirPath, file);
 
     if (fs.statSync(fullPath).isDirectory()) {
-      if (!excludedDirs.includes(file)) {
+      if (dirWhitelist.includes(file)) {
         arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
       }
-    } else if (!excludedFiles.includes(file)) {
+    } else if (fileWhitelist.includes(file)) {
       arrayOfFiles.push(fullPath);
     }
   });
@@ -40,7 +34,6 @@ function generateFileHash(filePath) {
 
 function generateManifest() {
   const manifest = { files: {} };
-  const filesToHash = ["monsters.xml", "index.js", "module.json", "README.md"];
 
   const allFiles = getAllFiles(__dirname);
 

@@ -30,6 +30,21 @@ module.exports = function StartRecording(mod) {
   let dungeonMap = {};
   let currentDungeon = "UnknownDungeon";
   const configPath = __dirname + "/config.json";
+  let currentBossId = null;
+  let obsRecordingPath = null;
+
+  function initializeOBSRecordingPath() {
+    return obs
+      .call("GetRecordDirectory")
+      .then((response) => {
+        obsRecordingPath = response?.recordDirectory || "Tera/Temp"; // Default to temp if not found
+        mod.log(`OBS Recording path set to: ${obsRecordingPath}`);
+      })
+      .catch((err) => {
+        mod.error("Failed to retrieve recording directory:", err);
+        obsRecordingPath = "Tera/Temp"; // Fallback to temp directory in case of error
+      });
+  }
 
   if (!fs.existsSync(configPath)) {
     mod.log("Config file not found. Generating default config...");
@@ -41,18 +56,6 @@ module.exports = function StartRecording(mod) {
     mod.log(
       "Default config file created. Please update the config with your OBS settings."
     );
-  }
-  function getOBSRecordingPath() {
-    return obs
-      .call("GetRecordDirectory")
-      .then((response) => {
-        const recordingPath = response?.recordDirectory || "Tera/Temp"; // Default to temp if not found
-        return recordingPath;
-      })
-      .catch((err) => {
-        mod.error("Failed to retrieve recording directory:", err);
-        return "Tera/Temp"; // Fallback to temp directory in case of error
-      });
   }
 
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
@@ -125,19 +128,21 @@ module.exports = function StartRecording(mod) {
     .connect(address, password, { rpcVersion: 1 })
     .then(() => {
       Msg("Connected to OBS WebSocket successfully.", mod);
+      return initializeOBSRecordingPath(); // Initialize the OBS recording path here
     })
     .catch((err) => {
       const errorMessage = `
-      Failed to connect to OBS WebSocket. Please check your OBS configuration, WebSocket plugin installation, and the following settings:
-      Address: ${address}, Password: ${password || "Not provided"}
-      Make sure OBS WebSocket is enabled and the address/password are correct.
-    `;
+    Failed to connect to OBS WebSocket. Please check your OBS configuration, WebSocket plugin installation, and the following settings:
+    Address: ${address}, Password: ${password || "Not provided"}
+    Make sure OBS WebSocket is enabled and the address/password are correct.
+  `;
       sendErrorToChat(errorMessage, err);
     });
 
   function startRecording() {
-    if (!isRecording) {
-      const folderPath = config.recording.temporary
+    if (!isRecording && obsRecordingPath) {
+      // Use relative path for OBS recording
+      const relativeFolderPath = config.recording.temporary
         ? "Tera/Temp"
         : `Tera/${currentDungeon}`;
       const fileName = config.recording.temporary
@@ -146,11 +151,29 @@ module.exports = function StartRecording(mod) {
             .toISOString()
             .replace(/[:.]/g, "-")}`;
 
+      // Full path for file system operations
+      const fullFolderPath = path.join(obsRecordingPath, relativeFolderPath);
+      const fullTempFolderPath = path.join(obsRecordingPath, "Tera", "Temp");
+
+      if (!fs.existsSync(fullFolderPath)) {
+        fs.mkdirSync(fullFolderPath, { recursive: true });
+      }
+
+      if (config.recording.temporary && fs.existsSync(fullTempFolderPath)) {
+        try {
+          fs.readdirSync(fullTempFolderPath).forEach((file) => {
+            const tempFilePath = path.join(fullTempFolderPath, file);
+            fs.unlinkSync(tempFilePath);
+          });
+        } catch (err) {
+          mod.error("Failed to wipe temp folder:", err);
+        }
+      }
       obs
         .call("SetProfileParameter", {
           parameterCategory: "Output",
           parameterName: "FilenameFormatting",
-          parameterValue: `${folderPath}/${fileName}`,
+          parameterValue: `${relativeFolderPath}/${fileName}`, // Relative path for OBS
         })
         .then(() => obs.call("StartRecord"))
         .then(() => {
@@ -166,6 +189,7 @@ module.exports = function StartRecording(mod) {
       saveLastRun();
     } else if (arg === "saveall") {
       config.recording.saveAll = !config.recording.saveAll;
+      config.recording.temporary = !config.recording.temporary;
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
       Msg(
         `Save all recordings is now ${
@@ -181,49 +205,44 @@ module.exports = function StartRecording(mod) {
   });
 
   function saveLastRun() {
-    getOBSRecordingPath().then((obsRecordingPath) => {
-      const baseFileName = "temp_recording";
+    const baseFileName = "temp_recording";
+    const finalDir = path.join(obsRecordingPath, "Tera", currentDungeon);
+    const tempRecordingPath = path.join(obsRecordingPath, "Tera", "Temp");
 
-      const finalDir = path.join(__dirname, "Tera", currentDungeon);
-      const tempRecordingPath = path.join(obsRecordingPath, "Tera", "Temp");
-      if (!fs.existsSync(finalDir)) {
-        fs.mkdirSync(finalDir, { recursive: true });
+    if (!fs.existsSync(finalDir)) {
+      fs.mkdirSync(finalDir, { recursive: true });
+    }
+
+    fs.readdir(tempRecordingPath, (err, files) => {
+      if (err) {
+        sendErrorToChat("Failed to read OBS recording directory", err);
+        return;
       }
-      console.log(finalDir);
+      const tempFile = files.find((file) => file.startsWith(baseFileName));
 
-      fs.readdir(tempRecordingPath, (err, files) => {
+      if (!tempFile) {
+        sendErrorToChat("No temporary recording found to save.");
+        return;
+      }
+
+      const tempFilePath = path.join(tempRecordingPath, tempFile);
+      const extension = path.extname(tempFile);
+      const finalFilePath = path.join(
+        finalDir,
+        `${bossName}_${mod.game.me.name}_${new Date()
+          .toISOString()
+          .replace(/[:.]/g, "-")}${extension}`
+      );
+
+      fs.rename(tempFilePath, finalFilePath, (err) => {
         if (err) {
-          sendErrorToChat("Failed to read OBS recording directory", err);
-          return;
+          sendErrorToChat("Failed to save the recording", err);
+        } else {
+          Msg(
+            `Recording saved for ${bossName} with extension ${extension}!`,
+            mod
+          );
         }
-        console.log(files);
-        const tempFile = files.find((file) => file.startsWith(baseFileName));
-        console.log(tempFile);
-
-        if (!tempFile) {
-          sendErrorToChat("No temporary recording found to save.");
-          return;
-        }
-
-        const tempFilePath = path.join(tempRecordingPath, tempFile);
-        const extension = path.extname(tempFile);
-        const finalFilePath = path.join(
-          finalDir,
-          `${bossName}_${mod.game.me.name}_${new Date()
-            .toISOString()
-            .replace(/[:.]/g, "-")}${extension}`
-        );
-
-        fs.rename(tempFilePath, finalFilePath, (err) => {
-          if (err) {
-            sendErrorToChat("Failed to save the recording", err);
-          } else {
-            Msg(
-              `Recording saved for ${bossName} with extension ${extension}!`,
-              mod
-            );
-          }
-        });
       });
     });
   }
@@ -234,6 +253,7 @@ module.exports = function StartRecording(mod) {
         .call("StopRecord")
         .then(() => {
           isRecording = false;
+          inCombat = false;
 
           if (config.recording.temporary && !config.recording.saveAll) {
             Msg(
@@ -241,10 +261,6 @@ module.exports = function StartRecording(mod) {
               mod
             );
           } else {
-            mod.setTimeout(() => {
-              saveLastRun();
-            }, 3000);
-
             Msg("Recording stopped and saving.", mod);
           }
         })
@@ -264,6 +280,23 @@ module.exports = function StartRecording(mod) {
     }
   });
 
+  mod.hook("S_CREATURE_LIFE", 3, (event) => {
+    if (event.despawn && event.gameId === currentBossId) {
+      bossDead = true;
+      stopRecording();
+
+      currentBossId = null;
+    }
+  });
+
+  mod.hook("S_DESPAWN_NPC", 3, (event) => {
+    if (event.gameId === currentBossId) {
+      stopRecording();
+
+      currentBossId = null;
+    }
+  });
+
   mod.hook("S_BOSS_GAGE_INFO", 3, (event) => {
     if (event.curHp <= 0 && !bossDead) {
       bossDead = true;
@@ -271,20 +304,12 @@ module.exports = function StartRecording(mod) {
     } else if (event.curHp > 0) {
       bossName = monsterMap[event.templateId].name || "UnknownBoss";
       currentDungeon = dungeonMap[event.huntingZoneId] || "UnknownDungeon";
+      currentBossId = event.id;
     }
   });
 
   mod.hook("S_LOAD_TOPO", 3, () => {
     if (isRecording) {
-      bossDead = false;
-      inCombat = false;
-      stopRecording();
-    }
-  });
-
-  mod.hook("S_INSTANCE_ARROW", 4, () => {
-    if (isRecording) {
-      mod.log("Boss reset detected. Resetting...");
       bossDead = false;
       inCombat = false;
       stopRecording();
