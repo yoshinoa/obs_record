@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
-
 const fileWhitelist = ["monsters.xml", "index.js", "module.json", "README.md"];
 const dirWhitelist = ["node_modules"];
 
@@ -14,11 +13,22 @@ function getAllFiles(dirPath, arrayOfFiles) {
     const fullPath = path.join(dirPath, file);
 
     if (fs.statSync(fullPath).isDirectory()) {
-      if (dirWhitelist.includes(file)) {
+      const isInWhitelistedDir = dirWhitelist.some((whitelistedDir) =>
+        fullPath.includes(whitelistedDir)
+      );
+
+      if (isInWhitelistedDir) {
         arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
       }
-    } else if (fileWhitelist.includes(file)) {
-      arrayOfFiles.push(fullPath);
+    } else {
+      const isWhitelistedFile = fileWhitelist.includes(file);
+      const isInWhitelistedDir = dirWhitelist.some((whitelistedDir) =>
+        fullPath.includes(whitelistedDir)
+      );
+
+      if (isWhitelistedFile || isInWhitelistedDir) {
+        arrayOfFiles.push(fullPath);
+      }
     }
   });
 
