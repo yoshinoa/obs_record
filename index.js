@@ -26,33 +26,6 @@ function sendErrorToChat(message, err = null) {
   mod.error(fullMessage);
 }
 
-function showHelp() {
-  Msg(
-    `
-    <font color="#00FFFF">Video Recording Commands:</font><br>
-    <font color="#FFD700">/8 video save</font> - Save the last temporary recording.<br>
-    <font color="#FFD700">/8 video saveall</font> - Toggle automatic saving of all recordings.<br>
-    <font color="#FFD700">/8 video help</font> - Display this help message.<br><br>
-    
-    <font color="#00FFFF">How it works:</font><br>
-    <font color="#FFD700">Temporary Recordings:</font> By default, recordings are stored temporarily in the "Tera/Temp" folder.<br>
-    After a run, type <font color="#FFD700">/8 video save</font> to save the recording, or it will be deleted.<br><br>
-
-    <font color="#FFD700">Save All Mode:</font> You can toggle this mode with <font color="#FFD700">/8 video saveall</font>.<br>
-    If enabled, all recordings will automatically be saved to the appropriate dungeon folder and won't be treated as temporary.<br><br>
-    
-    <font color="#00FFFF">Current Settings:</font><br>
-    <font color="#FFD700">Temporary Recording:</font> ${
-      config.recording.temporary ? "Enabled" : "Disabled"
-    }<br>
-    <font color="#FFD700">Save All:</font> ${
-      config.recording.saveAll ? "Enabled" : "Disabled"
-    }<br>
-  `,
-    mod
-  );
-}
-
 module.exports = function StartRecording(mod) {
   let inCombat = false;
   let bossDead = false;
@@ -77,6 +50,33 @@ module.exports = function StartRecording(mod) {
 
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
   const { address, password } = config.obs;
+
+  function showHelp() {
+    Msg(
+      `
+      <font color="#00FFFF">Video Recording Commands:</font><br>
+      <font color="#FFD700">/8 video save</font> - Save the last temporary recording.<br>
+      <font color="#FFD700">/8 video saveall</font> - Toggle automatic saving of all recordings.<br>
+      <font color="#FFD700">/8 video help</font> - Display this help message.<br><br>
+      
+      <font color="#00FFFF">How it works:</font><br>
+      <font color="#FFD700">Temporary Recordings:</font> By default, recordings are stored temporarily in the "Tera/Temp" folder.<br>
+      After a run, type <font color="#FFD700">/8 video save</font> to save the recording, or it will be deleted.<br><br>
+  
+      <font color="#FFD700">Save All Mode:</font> You can toggle this mode with <font color="#FFD700">/8 video saveall</font>.<br>
+      If enabled, all recordings will automatically be saved to the appropriate dungeon folder and won't be treated as temporary.<br><br>
+      
+      <font color="#00FFFF">Current Settings:</font><br>
+      <font color="#FFD700">Temporary Recording:</font> ${
+        config.recording.temporary ? "Enabled" : "Disabled"
+      }<br>
+      <font color="#FFD700">Save All:</font> ${
+        config.recording.saveAll ? "Enabled" : "Disabled"
+      }<br>
+    `,
+      mod
+    );
+  }
 
   fs.readFile(__dirname + "/monsters.xml", (err, data) => {
     if (err) {
