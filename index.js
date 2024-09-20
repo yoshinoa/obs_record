@@ -20,12 +20,6 @@ function Msg(msg, mod) {
   mod.command.message(`<font color="${LPrC}">${msg}</font>`);
 }
 
-function sendErrorToChat(message, err = null) {
-  const fullMessage = err ? `${message} Error: ${err.message || err}` : message;
-  mod.command.message(fullMessage);
-  mod.error(fullMessage);
-}
-
 module.exports = function StartRecording(mod) {
   let inCombat = false;
   let bossDead = false;
@@ -76,6 +70,14 @@ module.exports = function StartRecording(mod) {
     `,
       mod
     );
+  }
+
+  function sendErrorToChat(message, err = null) {
+    const fullMessage = err
+      ? `${message} Error: ${err.message || err}`
+      : message;
+    mod.command.message(fullMessage);
+    mod.error(fullMessage);
   }
 
   fs.readFile(__dirname + "/monsters.xml", (err, data) => {
