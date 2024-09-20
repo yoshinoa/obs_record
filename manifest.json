@@ -1,6 +1,6 @@
 {
   "files": {
-    "index.js": "8948eb1210fa5890be2c8f3e6b37db3477d82547d028709c9664550ca85e5aed",
+    "index.js": "4665a1e141aeab67d8c3a80fe728cb9305f2b7b436ca63fc1c48d506fd3b8246",
     "monsters.xml": "1f37c531d56e236b6907c615b531a48cf245b89a64cc829246f7137ca85d39db",
     "node_modules/@msgpack/msgpack/dist/CachedKeyDecoder.d.ts": "c10bc11463f1636f0130dfcc06c7e41908f250defdf1ee17c517654f014a8b32",
     "node_modules/@msgpack/msgpack/dist/CachedKeyDecoder.js": "bdef0051b649c0ada2e3b1ef381fbb902ce8670528bfb83fd5e292f1f3e4bbd4",

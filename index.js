@@ -3,6 +3,7 @@ const { OBSWebSocket } = require("obs-websocket-js");
 const fs = require("fs");
 const xml2js = require("xml2js"); // XML parser
 const obs = new OBSWebSocket();
+const path = require("path");
 
 const defaultConfig = {
   obs: {
@@ -40,6 +41,18 @@ module.exports = function StartRecording(mod) {
     mod.log(
       "Default config file created. Please update the config with your OBS settings."
     );
+  }
+  function getOBSRecordingPath() {
+    return obs
+      .call("GetRecordDirectory")
+      .then((response) => {
+        const recordingPath = response?.recordDirectory || "Tera/Temp"; // Default to temp if not found
+        return recordingPath;
+      })
+      .catch((err) => {
+        mod.error("Failed to retrieve recording directory:", err);
+        return "Tera/Temp"; // Fallback to temp directory in case of error
+      });
   }
 
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
@@ -168,45 +181,49 @@ module.exports = function StartRecording(mod) {
   });
 
   function saveLastRun() {
-    const tempDir = path.join(__dirname, "Tera", "Temp");
-    const finalDir = path.join(__dirname, "Tera", currentDungeon);
-    const baseFileName = "temp_recording";
+    getOBSRecordingPath().then((obsRecordingPath) => {
+      const baseFileName = "temp_recording";
 
-    if (!fs.existsSync(finalDir)) {
-      fs.mkdirSync(finalDir, { recursive: true });
-    }
-
-    fs.readdir(tempDir, (err, files) => {
-      if (err) {
-        sendErrorToChat("Failed to read temp directory", err);
-        return;
+      const finalDir = path.join(__dirname, "Tera", currentDungeon);
+      const tempRecordingPath = path.join(obsRecordingPath, "Tera", "Temp");
+      if (!fs.existsSync(finalDir)) {
+        fs.mkdirSync(finalDir, { recursive: true });
       }
+      console.log(finalDir);
 
-      const tempFile = files.find((file) => file.startsWith(baseFileName));
-
-      if (!tempFile) {
-        sendErrorToChat("No temporary recording found to save.");
-        return;
-      }
-
-      const tempFilePath = path.join(tempDir, tempFile);
-      const extension = path.extname(tempFile);
-      const finalFilePath = path.join(
-        finalDir,
-        `${bossName}_${mod.game.me.name}_${new Date()
-          .toISOString()
-          .replace(/[:.]/g, "-")}${extension}`
-      );
-
-      fs.rename(tempFilePath, finalFilePath, (err) => {
+      fs.readdir(tempRecordingPath, (err, files) => {
         if (err) {
-          sendErrorToChat("Failed to save the recording", err);
-        } else {
-          Msg(
-            `Recording saved for ${bossName} with extension ${extension}!`,
-            mod
-          );
+          sendErrorToChat("Failed to read OBS recording directory", err);
+          return;
         }
+        console.log(files);
+        const tempFile = files.find((file) => file.startsWith(baseFileName));
+        console.log(tempFile);
+
+        if (!tempFile) {
+          sendErrorToChat("No temporary recording found to save.");
+          return;
+        }
+
+        const tempFilePath = path.join(tempRecordingPath, tempFile);
+        const extension = path.extname(tempFile);
+        const finalFilePath = path.join(
+          finalDir,
+          `${bossName}_${mod.game.me.name}_${new Date()
+            .toISOString()
+            .replace(/[:.]/g, "-")}${extension}`
+        );
+
+        fs.rename(tempFilePath, finalFilePath, (err) => {
+          if (err) {
+            sendErrorToChat("Failed to save the recording", err);
+          } else {
+            Msg(
+              `Recording saved for ${bossName} with extension ${extension}!`,
+              mod
+            );
+          }
+        });
       });
     });
   }
@@ -224,7 +241,11 @@ module.exports = function StartRecording(mod) {
               mod
             );
           } else {
-            Msg("Recording stopped and saved.", mod);
+            mod.setTimeout(() => {
+              saveLastRun();
+            }, 3000);
+
+            Msg("Recording stopped and saving.", mod);
           }
         })
         .catch((err) => mod.error("Failed to stop recording:", err));
