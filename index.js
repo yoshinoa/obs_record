@@ -268,51 +268,16 @@ module.exports = function StartRecording(mod) {
     }
   }
 
-  mod.hook("S_USER_STATUS", 3, (event) => {
-    if (event.status === 1 && !inCombat) {
-      inCombat = true;
+  d.hook("S_SPAWN_ME", "*", (e) => {
+    if (d.game.me.inDungeon) {
       startRecording();
-    } else if (event.status !== 1 && inCombat) {
-      if (bossDead) {
-        inCombat = false;
-        stopRecording();
-      }
-    }
-  });
-
-  mod.hook("S_CREATURE_LIFE", 3, (event) => {
-    if (event.despawn && event.gameId === currentBossId) {
-      bossDead = true;
-      stopRecording();
-
-      currentBossId = null;
-    }
-  });
-
-  mod.hook("S_DESPAWN_NPC", 3, (event) => {
-    if (event.gameId === currentBossId) {
-      stopRecording();
-
-      currentBossId = null;
     }
   });
 
   mod.hook("S_BOSS_GAGE_INFO", 3, (event) => {
-    if (event.curHp <= 0 && !bossDead) {
-      bossDead = true;
-      stopRecording();
-    } else if (event.curHp > 0) {
-      bossName = monsterMap[event.templateId].name || "UnknownBoss";
-      currentDungeon = dungeonMap[event.huntingZoneId] || "UnknownDungeon";
-      currentBossId = event.id;
-    }
-  });
-
-  mod.hook("S_NPC_TARGET_USER", 1, (event) => {
-    if ((event.target = currentBossId)) {
-      inCombat = true;
-      startRecording();
-    }
+    bossName = monsterMap[event.templateId].name || "UnknownBoss";
+    currentDungeon = dungeonMap[event.huntingZoneId] || "UnknownDungeon";
+    currentBossId = event.id;
   });
 
   mod.hook("S_LOAD_TOPO", 3, () => {
